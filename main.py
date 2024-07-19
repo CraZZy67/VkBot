@@ -13,6 +13,22 @@ def get_text(file: str) -> str:
         return "".join(f.readlines())
 
 
+def add_user(user_id: str):
+    attend = False
+    with open("data/users_db.csv", "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+        if len(lines) > 0:
+            for i in lines:
+                i = i[0:-1]
+                if user_id == i:
+                    attend = True
+
+    if not attend:
+        with open("data/users_db.csv", "a", encoding="utf-8") as f:
+            f.write(user_id + "\n")
+
+
 def main():
     trigger_words_s = [
                         "начать", "start", "/start", "/начать", "Начать", "Start"
@@ -26,6 +42,7 @@ def main():
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] in trigger_words_s:
             id_ = event.obj.message["from_id"]
+            add_user(str(id_))
 
             if vk.groups.isMember(group_id=os.getenv("GROUP_ID"), user_id=id_):
                 vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/follow.txt"))
