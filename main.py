@@ -95,6 +95,7 @@ def main():
         if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] == "/users":
             id_ = event.obj.message["from_id"]
             if id_ in admins:
+
                 kb2 = VkKeyboard(one_time=False, inline=True)
                 kb2.add_button(color=VkKeyboardColor.NEGATIVE, label="Отчистить базу данных")
                 kb2.add_button(color=VkKeyboardColor.POSITIVE, label="Разослать сообщение")
@@ -114,16 +115,40 @@ def main():
             id_ = event.obj.message["from_id"]
             if id_ in admins:
                 if get_len_db() < 100 and get_len_db() != 0:
-                    vk.messages.send(user_ids=get_ids(), random_id=0, message=get_text("texts/distribution.txt"),
-                                     dont_parse_links=0)
+                    error_users = 0
+                    response = vk.messages.send(user_ids=get_ids(), random_id=0,
+                                                message=get_text("texts/distribution.txt"),
+                                                dont_parse_links=0)
+                    for v in response:
+                        try:
+                            if v["error"]["code"] in [900, 901]:
+                                error_users += 1
+
+                        except KeyError:
+                            continue
+
                     main_logger.info("Меньше ста сообщений разослано!")
+                    vk.messages.send(user_id=id_, random_id=0,
+                                    message=f"Сообщение разослано. Не удалось отправить: {error_users}")
 
                 elif get_len_db() >= 100:
+                    error_users = 0
                     for i in get_ids():
-                        vk.messages.send(user_ids=i, random_id=0,
-                                         message=get_text("texts/distribution.txt"),
-                                         dont_parse_links=0)
+                        response = vk.messages.send(user_ids=i, random_id=0,
+                                                    message=get_text("texts/distribution.txt"),
+                                                    dont_parse_links=0)
+
+                        for v in response:
+                            try:
+                                if v["error"]["code"] in [900, 901]:
+                                    error_users += 1
+
+                            except KeyError:
+                                continue
+
                     main_logger.info("Больше ста сообщений разослано!")
+                    vk.messages.send(user_id=id_, random_id=0,
+                                     message=f"Сообщение разослано. Не удалось отправить: {error_users}")
 
 
 if __name__ == '__main__':
