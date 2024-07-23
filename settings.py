@@ -23,4 +23,4 @@ class Settings:
     PATH_UN_FOLLOW = "texts/un_follow.txt"
 
 
-settings = Settings()
+settings1 = Settings()
