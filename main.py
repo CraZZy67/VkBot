@@ -121,15 +121,25 @@ try:
                     id_ = event.obj.message["from_id"]
                     if id_ in admins:
                         if get_len_db() < 100 and get_len_db() != 0:
+                            response2 = 0
                             error_users = 0
-                            response = vk.messages.send(user_ids=get_ids(), random_id=0,
-                                                        message=get_text("texts/distribution.txt"),
-                                                        dont_parse_links=0)
+                            if len(get_text("texts/follow.txt")) <= 4096:
+                                response = vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/distribution.txt"))
+                            else:
+                                response = vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/distribution.txt")[0:4096])
+                                response2 = vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/distribution.txt")[4096:])
+
                             for v in response:
                                 try:
                                     if v["error"]["code"] in [900, 901]:
                                         error_users += 1
+                                except KeyError:
+                                    continue
 
+                            for v in response2:
+                                try:
+                                    if v["error"]["code"] in [900, 901]:
+                                        error_users += 1
                                 except KeyError:
                                     continue
 
