@@ -1,164 +1,40 @@
-import vk_api
+from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from dotenv import load_dotenv
 
-import os
-from typing import Union
+from sup_functions import *
+from keyboards import kb_db_info
 
-from loger import main_logger
-
-load_dotenv()
-
-trigger_words_s = [
-    "начать", "start", "/start", "/начать", "Начать", "Start",
-    "Я подписался!", "я подписался", "Я подписался", "я подписался!"
-]
-
-admins = [521427402, 428409458]
+vk_session = VkApi(token=settings1.TOKEN)
+longpoll = VkBotLongPoll(vk_session, settings1.GROUP_ID)
+vk = vk_session.get_api()
 
 
-def get_text(file: str) -> str:
-    with open(file, encoding="utf-8") as f:
-        return "".join(f.readlines())
+def main():
+    for event in longpoll.listen():
 
+        if event.type == VkBotEventType.MESSAGE_NEW:
+            user_id = event.obj.message["from_id"]
 
-def get_len_db() -> int:
-    with open("data/users_db.csv", "r", encoding="utf-8") as f:
-        return len(f.readlines())
+            if event.obj.message["text"] in settings1.WORDS:
+                add_user(user_id)
+                check_follow(vk=vk, group_id=settings1.GROUP_ID, user_id=user_id)
 
+            if str(user_id) in settings1.ADMINS.split(","):
 
-def get_ids() -> Union[str, list]:
-    with open("data/users_db.csv", "r", encoding="utf-8") as f:
-        ids_list = []
-        if get_len_db() < 100:
-            return ",".join(f.readlines()).replace("\n", "")
-        else:
-            with open("data/users_db.csv", "r", encoding="utf-8") as file:
-                count = 0
-                str_r = ""
-                for i in file.readlines():
-                    count += 1
-                    if count != 100:
-                        str_r += f"{i[0:-1]},"
-                    else:
-                        ids_list.append(str_r[0:-1])
-                        count = 0
-                        str_r = ""
-                return ids_list
+                if event.obj.message["text"] == "/users":
+                    text = f"Пользователей в базе данных: {get_len_db()}"
+                    vk.messages.send(user_id=user_id, random_id=0, message=text, keyboard=kb_db_info())
+                    main_logger.info("Информация о БД отправлена в диалог.")
 
+                if event.obj.message["text"] == "Отчистить базу данных":
+                    clear_db()
+                    vk.messages.send(user_id=user_id, random_id=0, message="База данных отчищена")
 
-def add_user(user_id: str):
-    attend = False
-    with open("data/users_db.csv", "r", encoding="utf-8") as f:
-        lines = f.readlines()
-
-        if len(lines) > 0:
-            for i in lines:
-                i = i[0:-1]
-                if user_id == i:
-                    attend = True
-                    main_logger.info(f"Пользователь уже есть в БД id: {user_id}")
-
-    if not attend:
-        with open("data/users_db.csv", "a", encoding="utf-8") as f:
-            f.write(user_id + "\n")
-            main_logger.info(f"Пользователь добавлен в БД id: {user_id}")
-
-
-def clear_db():
-    with open("data/users_db.csv", "w", encoding="utf-8") as f:
-        f.write("")
+                if event.obj.message["text"] == "Разослать сообщение":
+                    distribution_text(vk=vk, user_id=user_id)
 
 
 try:
-    def main():
-        vk_session = vk_api.VkApi(token=os.getenv("TOKEN"))
-        longpoll = VkBotLongPoll(vk_session, os.getenv("GROUP_ID"))
-        vk = vk_session.get_api()
-
-        for event in longpoll.listen():
-            try:
-                if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] in trigger_words_s:
-                    id_ = event.obj.message["from_id"]
-                    add_user(str(id_))
-
-                    if vk.groups.isMember(group_id=os.getenv("GROUP_ID"), user_id=id_):
-                        if len(get_text("texts/follow.txt")) <= 4096:
-                            vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/follow.txt"))
-                        else:
-                            vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/follow.txt")[0:4096])
-                            vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/follow.txt")[4096:])
-                        main_logger.info(f"Пользователь {id_} подписан, продолжение отправлено.")
-                    else:
-                        kb = VkKeyboard(one_time=False, inline=True)
-                        kb.add_button(color=VkKeyboardColor.POSITIVE, label="Я подписался")
-
-                        vk.messages.send(user_id=id_, random_id=0, message=get_text("texts/un_follow.txt"),
-                                         keyboard=kb.get_keyboard())
-                        main_logger.info(f"Пользователь {id_} не подписан")
-
-                if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] == "/users":
-                    id_ = event.obj.message["from_id"]
-                    if id_ in admins:
-
-                        kb2 = VkKeyboard(one_time=False, inline=True)
-                        kb2.add_button(color=VkKeyboardColor.NEGATIVE, label="Отчистить базу данных")
-                        kb2.add_button(color=VkKeyboardColor.POSITIVE, label="Разослать сообщение")
-
-                        vk.messages.send(user_id=id_, random_id=0, message=f"Пользователей в базе данных: {get_len_db()}",
-                                         keyboard=kb2.get_keyboard())
-                        main_logger.info("Информация о БД отправлена в диалог.")
-
-                if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] == "Отчистить базу данных":
-                    id_ = event.obj.message["from_id"]
-                    if id_ in admins:
-                        clear_db()
-                        main_logger.info("База данных отчищена")
-                        vk.messages.send(user_id=id_, random_id=0, message="База данных отчищена")
-
-                if event.type == VkBotEventType.MESSAGE_NEW and event.obj.message["text"] == "Разослать сообщение":
-                    id_ = event.obj.message["from_id"]
-                    if id_ in admins:
-                        if get_len_db() < 100 and get_len_db() != 0:
-                            error_users = 0
-                            response = vk.messages.send(user_ids=get_ids(), random_id=0,
-                                                        message=get_text("texts/distribution.txt"),
-                                                        dont_parse_links=0)
-                            for v in response:
-                                try:
-                                    if v["error"]["code"] in [900, 901]:
-                                        error_users += 1
-
-                                except KeyError:
-                                    continue
-
-                            main_logger.info("Меньше ста сообщений разослано!")
-                            vk.messages.send(user_id=id_, random_id=0,
-                                             message=f"Сообщение разослано. Не удалось отправить: {error_users}")
-
-                        elif get_len_db() >= 100:
-                            error_users = 0
-                            for i in get_ids():
-                                response = vk.messages.send(user_ids=i, random_id=0,
-                                                            message=get_text("texts/distribution.txt"),
-                                                            dont_parse_links=0)
-
-                                for v in response:
-                                    try:
-                                        if v["error"]["code"] in [900, 901]:
-                                            error_users += 1
-
-                                    except KeyError:
-                                        continue
-
-                            main_logger.info("Больше ста сообщений разослано!")
-                            vk.messages.send(user_id=id_, random_id=0,
-                                             message=f"Сообщение разослано. Не удалось отправить: {error_users}")
-
-            except Exception as ex:
-                main_logger.exception(f"Произошла неожиданная ошибка: {ex}")
-                continue
 
     if __name__ == '__main__':
         main_logger.info("Бот запущен!")
@@ -166,6 +42,4 @@ try:
 
 except Exception as ex:
     main_logger.exception(f"Произошла неожиданная ошибка: {ex}")
-
-
-
+    main()
