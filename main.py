@@ -2,7 +2,7 @@ from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from sup_functions import *
-from keyboards import kb_db_info
+from keyboards import kb_db_info, kb_texts
 
 vk_session = VkApi(token=settings1.TOKEN)
 longpoll = VkBotLongPoll(vk_session, settings1.GROUP_ID)
@@ -32,6 +32,10 @@ def main():
 
                 if event.obj.message["text"] == "Разослать сообщение":
                     distribution_text(vk=vk, user_id=user_id)
+
+                if event.obj.message["text"] == "/change":
+                    text = "Выберите какой из текстов вам надо заменить."
+                    vk.messages.send(user_id=user_id, random_id=0, message=text, keyboard=kb_texts())
 
 
 try:

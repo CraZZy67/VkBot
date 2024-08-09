@@ -14,3 +14,12 @@ def kb_db_info():
     kb.add_button(color=VkKeyboardColor.POSITIVE, label="Разослать сообщение")
 
     return kb.get_keyboard()
+
+
+def kb_texts():
+    kb = VkKeyboard(one_time=False, inline=True)
+    kb.add_button(color=VkKeyboardColor.POSITIVE, label="Подписан")
+    kb.add_button(color=VkKeyboardColor.NEGATIVE, label="Не подписан")
+    kb.add_button(color=VkKeyboardColor.PRIMARY, label="Рассылка")
+
+    return kb.get_keyboard()
