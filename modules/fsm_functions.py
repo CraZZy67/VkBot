@@ -2,7 +2,7 @@ import requests
 import vk_api
 from vk_api.vk_api import VkApiMethod
 
-from logger import main_logger
+from modules.logger import main_logger
 
 
 def handling_docs(vk: VkApiMethod, attachment, state: str) -> str:

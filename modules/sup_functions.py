@@ -1,7 +1,7 @@
 from vk_api.vk_api import VkApiMethod
 
-from logger import main_logger
-from keyboards import kb_un_follow
+from modules.logger import main_logger
+from modules.keyboards import kb_un_follow
 from settings import settings1
 
 from math import ceil
