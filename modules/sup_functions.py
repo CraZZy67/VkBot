@@ -1,4 +1,5 @@
 from vk_api.vk_api import VkApiMethod
+from vk_api.exceptions import ApiError
 
 from modules.logger import main_logger
 from modules.keyboards import kb_un_follow
@@ -93,11 +94,17 @@ def distribution_text(vk: VkApiMethod, user_id: int) -> None:
     error_users = int()
         
     for i in ids:
-        for k in range(0, counter):
-            text = text_formatting(text=text, user_id=int(i))
-            response = vk.messages.send(user_id=int(i), random_id = 0, message=text[k * 4096:(k + 1) * 4096])
-
-        error_users += 0 if isinstance(response, int) else 1
+        try:
+            for k in range(0, counter):
+                text = text_formatting(text=text, user_id=int(i))
+                vk.messages.send(user_id=int(i), random_id = 0, message=text[k * 4096:(k + 1) * 4096]) 
+        except ApiError as ex:
+            if ex.code == 901:
+                error_users += 1
+                print(f"Пользователь {i} запретил отправку сообщений.")
+                continue
+            else:
+                print(f"Произошла ошибка VK API: {ex}")
 
     vk.messages.send(user_id=user_id, random_id=0,
                         message=f"Сообщение разослано. Не удалось отправить: {error_users}")
