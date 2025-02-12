@@ -18,9 +18,14 @@ def main():
 
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     user_id = event.obj.message["from_id"]
+                    
+                    user_info = vk_session.method("users.get", {"user_ids": user_id, "fields": "first_name,last_name"})
+                    
+                    user_first_name = user_info[0]["first_name"] if "first_name" in user_info[0] else None
+                    user_last_name = user_info[0]["last_name"] if "last_name" in user_info[0] else None
 
                     if event.obj.message["text"] in settings1.WORDS:
-                        modules.add_user(user_id)
+                        modules.add_user(str(user_id), str(user_first_name), str(user_last_name))
                         modules.check_follow(vk=vk, group_id=settings1.GROUP_ID, user_id=user_id)
 
                     if str(user_id) in settings1.ADMINS.split(","):

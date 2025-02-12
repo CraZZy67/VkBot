@@ -4,24 +4,25 @@ from modules.logger import main_logger
 from modules.keyboards import kb_un_follow
 from settings import settings1
 
+from functools import reduce
 from math import ceil
 from typing import Union
 
 
-def add_user(user_id: str) -> None:
+def add_user(user_id: int, user_first_name: str, user_last_name: str) -> None:
     attend = False
     with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
         for i in lines:
             i = i[0:-1]
-            if str(user_id) == i:
+            if user_id == i:
                 attend = True
                 main_logger.info(f"Пользователь уже есть в БД id: {user_id}")
 
     if not attend:
         with open(settings1.PATH_DB, "a", encoding="utf-8") as f:
-            f.write(str(user_id) + "\n")
+            f.write("{0},{1},{2}\n".format(user_id, user_first_name, user_last_name))
             main_logger.info(f"Пользователь добавлен в БД id: {user_id}")
 
 
@@ -57,69 +58,43 @@ def clear_db() -> None:
         f.write("")
     main_logger.info("База данных отчищена")
 
+def get_user_info(user_id: int) -> list:
+    with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
+        for i in f:
+            if int(i.split(",")[0]) == user_id:
+                return i.strip().split(",")[1:]
+            
+def text_formatting(text: str, user_id: int):
+    user_info = get_user_info(user_id=user_id)
+    
+    if "first_name" in text and "last_name" in text:
+        return text.format(first_name=user_info[0], last_name=user_info[1])
+    
+    elif "{first_name}" in text: 
+        return text.format(first_name=user_info[0])
+        
+    elif "{last_name}" in text: 
+        return text.format(last_name=user_info[1])
+    
+    return text
 
-def get_ids() -> Union[list, str]:
-    ids_list = list()
-    if get_len_db() <= 100:
-        with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
-            return ",".join(f.readlines()).replace("\n", "")
-
-    else:
-        count = int()
-        str_ = str()
-
-        with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
-            for i in f.readlines():
-                count += 1
-                if count != 101:
-                    str_ += f"{i[0:-1]},"
-
-                else:
-                    ids_list.append(str_[0:-1])
-                    count = int()
-                    str_ = str()
-
-    return ids_list
-
-
-def count_error_users(response: dict):
-    error_users = int()
-
-    for i in response:
-        try:
-            if i["error"]["code"] in [900, 901]:
-                error_users += 1
-        except KeyError:
-            continue
-    return error_users
-
+def get_ids() -> list:
+    with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
+        return [i.split(",")[0] for i in f]
 
 def distribution_text(vk: VkApiMethod, user_id: int) -> None:
     ids = get_ids()
-    response = list()
-
     text = get_text(settings1.PATH_DISTRIBUTION)
     len_text = len(text)
     counter = ceil(len_text / 4096)
+    error_users = int()
+        
+    for i in ids:
+        for k in range(0, counter):
+            text = text_formatting(text=text, user_id=int(i))
+            response = vk.messages.send(user_id=int(i), random_id = 0, message=text[k * 4096:(k + 1) * 4096])
 
-    if isinstance(ids, str):
-        for i in range(0, counter):
-            response = vk.messages.send(user_ids=ids, random_id=0, message=text[i * 4096:(i + 1) * 4096])
+        error_users += 0 if isinstance(response, int) else 1
 
-        error_users = count_error_users(response)
-
-        main_logger.info("Меньше ста сообщений разослано!")
-        vk.messages.send(user_id=user_id, random_id=0,
-                         message=f"Сообщение разослано. Не удалось отправить: {error_users}")
-
-    elif isinstance(ids, list):
-        error_users = int()
-        for i in get_ids():
-            for k in range(0, counter):
-                response = vk.messages.send(user_ids=i, random_id=0, message=text[k * 4096:(k + 1) * 4096])
-
-            error_users += count_error_users(response)
-
-        main_logger.info("Больше ста сообщений разослано!")
-        vk.messages.send(user_id=user_id, random_id=0,
-                         message=f"Сообщение разослано. Не удалось отправить: {error_users}")
+    vk.messages.send(user_id=user_id, random_id=0,
+                        message=f"Сообщение разослано. Не удалось отправить: {error_users}")
