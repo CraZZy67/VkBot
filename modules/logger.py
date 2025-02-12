@@ -1,7 +1,7 @@
 import logging
 
 main_logger = logging.getLogger(__name__)
-handler = logging.FileHandler("../logs.log", encoding="utf-8")
+handler = logging.FileHandler("logs.log", encoding="utf-8")
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d) [%(filename)s]')
 

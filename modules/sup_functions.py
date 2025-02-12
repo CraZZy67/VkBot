@@ -67,20 +67,23 @@ def get_user_info(user_id: int) -> list:
 def text_formatting(text: str, user_id: int):
     user_info = get_user_info(user_id=user_id)
     
-    if "first_name" in text and "last_name" in text:
-        return text.format(first_name=user_info[0], last_name=user_info[1])
-    
-    elif "{first_name}" in text: 
-        return text.format(first_name=user_info[0])
+    if len(user_info) > 1:
+        if "first_name" in text and "last_name" in text:
+            return text.format(first_name=user_info[0], last_name=user_info[1])
         
-    elif "{last_name}" in text: 
-        return text.format(last_name=user_info[1])
+        elif "{first_name}" in text: 
+            return text.format(first_name=user_info[0])
+            
+        elif "{last_name}" in text: 
+            return text.format(last_name=user_info[1])
+        
+        return text
+    else:
+        return text.replace("{first_name}", "").replace("{last_name}", "")
     
-    return text
-
 def get_ids() -> list:
     with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
-        return [i.split(",")[0] for i in f]
+        return [i.strip().split(",")[0] for i in f]
 
 def distribution_text(vk: VkApiMethod, user_id: int) -> None:
     ids = get_ids()
