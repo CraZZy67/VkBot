@@ -10,14 +10,14 @@ from math import ceil
 from typing import Union
 
 
-def add_user(user_id: int, user_first_name: str, user_last_name: str) -> None:
+def add_user(user_id: str, user_first_name: str, user_last_name: str) -> None:
     attend = False
     with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
         for i in lines:
-            i = i[0:-1]
-            if user_id == i:
+            i = i.split(',')
+            if user_id == i[0]:
                 attend = True
                 main_logger.info(f"Пользователь уже есть в БД id: {user_id}")
 
