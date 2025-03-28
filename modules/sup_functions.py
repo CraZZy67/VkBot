@@ -94,9 +94,10 @@ def distribution_text(vk: VkApiMethod, user_id: int) -> None:
     error_users = int()
         
     for i in ids:
+        text = get_text(settings1.PATH_DISTRIBUTION)
+        text = text_formatting(text=text, user_id=int(i))
         try:
             for k in range(0, counter):
-                text = text_formatting(text=text, user_id=int(i))
                 vk.messages.send(user_id=int(i), random_id = 0, message=text[k * 4096:(k + 1) * 4096]) 
         except ApiError as ex:
             if ex.code == 901:
