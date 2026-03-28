@@ -5,9 +5,10 @@ from modules.logger import main_logger
 from modules.keyboards import kb_un_follow
 from settings import settings1
 
-from functools import reduce
+import re
+from datetime import datetime, timezone, timedelta
 from math import ceil
-from typing import Union
+from asyncio import sleep
 
 
 def add_user(user_id: str, user_first_name: str, user_last_name: str) -> None:
@@ -53,11 +54,23 @@ def get_len_db() -> int:
     with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
         return len(f.readlines())
 
-
-def clear_db() -> None:
+def remove_blocked_users(blocked_user_ids: list) -> None:
+    if not blocked_user_ids:
+        return
+        
+    with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    
+    filtered_lines = []
+    for line in lines:
+        user_id = line.strip().split(",")[0]
+        if user_id not in blocked_user_ids:
+            filtered_lines.append(line)
+    
     with open(settings1.PATH_DB, "w", encoding="utf-8") as f:
-        f.write("")
-    main_logger.info("База данных отчищена")
+        f.writelines(filtered_lines)
+    
+    main_logger.info(f"Удалено {len(blocked_user_ids)} заблокированных пользователей из БД")
 
 def get_user_info(user_id: int) -> list:
     with open(settings1.PATH_DB, "r", encoding="utf-8") as f:
@@ -92,6 +105,7 @@ def distribution_text(vk: VkApiMethod, user_id: int) -> None:
     len_text = len(text)
     counter = ceil(len_text / 4096)
     error_users = int()
+    blocked_user_ids = []
         
     for i in ids:
         text = get_text(settings1.PATH_DISTRIBUTION)
@@ -102,10 +116,22 @@ def distribution_text(vk: VkApiMethod, user_id: int) -> None:
         except ApiError as ex:
             if ex.code == 901:
                 error_users += 1
+                blocked_user_ids.append(i)
                 print(f"Пользователь {i} запретил отправку сообщений.")
                 continue
             else:
                 print(f"Произошла ошибка VK API: {ex}")
 
+    remove_blocked_users(blocked_user_ids)
+
     vk.messages.send(user_id=user_id, random_id=0,
-                        message=f"Сообщение разослано. Не удалось отправить: {error_users}")
+                        message=f"Сообщение разослано. Не удалось отправить: {error_users}. Удалено из БД: {len(blocked_user_ids)}")
+
+def check_datetime(string: str) -> tuple | None:
+    regex = r'^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$'
+    match = re.fullmatch(regex, string=string)
+
+    if match:
+        return match.group(1), match.group(2), match.group(3), match.group(4)
+    else:
+        return None
