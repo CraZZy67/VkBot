@@ -1,0 +1,3 @@
+python-dotenv==1.2.2
+vk-api==11.10.0
+requests==2.33.0
