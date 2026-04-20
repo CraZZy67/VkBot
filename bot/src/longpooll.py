@@ -1,6 +1,6 @@
 import requests
-from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent
 from vk_api import VkApi
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent
 
 
 class BotsLongPollCust(VkBotLongPoll):
