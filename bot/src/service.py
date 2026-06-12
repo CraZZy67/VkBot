@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from datetime import datetime
@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from .wrappers import with_session
 from .models import Group, Admin, User, Template, Job
-from .enums import StatusesEn
+from .enums import StatusesEn, TemplateNames
 
 
 @with_session
@@ -46,11 +46,12 @@ def get_number_users(group_id: int, session: Session | None = None) -> int:
     return len(session.scalars(select(User).where(User.group_id == group_id)).all())
 
 @with_session
-def add_job(group_id: int, datetime: datetime, session: Session | None = None) -> str:
+def add_job(group_id: int, datetime: datetime, user_id: int, session: Session | None = None) -> str:
     uuid_job = uuid4().__str__()
 
     new_job = Job(
         uuid=uuid_job,
+        owner_id=user_id,
         group_id=group_id,
         run_at=datetime,
         status=StatusesEn.PENDING
@@ -58,3 +59,14 @@ def add_job(group_id: int, datetime: datetime, session: Session | None = None) -
     
     session.add(new_job)
     return uuid_job
+
+@with_session
+def update_template(group_id: int, field: str, text: str, session: Session | None = None) -> None:
+    if field == TemplateNames.SUBSCRIBE:
+        stmt = update(Template).where(Template.group_id == group_id).values(subscribed=text)
+    elif field == TemplateNames.NOT_SUBSCRIBE:
+        stmt = update(Template).where(Template.group_id == group_id).values(not_subscribed=text)
+    else:
+        stmt = update(Template).where(Template.group_id == group_id).values(distribution=text)
+    
+    session.execute(stmt)

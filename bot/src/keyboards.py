@@ -1,11 +1,11 @@
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from .config import CommandsEn
-
+from .enums import CheckWordsEn
 
 def kb_not_subscribed():
     kb = VkKeyboard(one_time=False, inline=True)
-    kb.add_button(color=VkKeyboardColor.POSITIVE, label='Подписался')
+    kb.add_button(color=VkKeyboardColor.POSITIVE, label=CheckWordsEn.SUBSCRIBED)
 
     return kb.get_keyboard()
 

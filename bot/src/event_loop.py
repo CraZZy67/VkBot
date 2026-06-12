@@ -7,7 +7,8 @@ from .utils import (
     form_api_dict, 
     get_user_info, 
     user_is_follower, 
-    parse_datetime
+    parse_datetime,
+    get_file
 )
 from .service import (
     get_groups, 
@@ -16,18 +17,20 @@ from .service import (
     add_user, 
     get_template, 
     add_job, 
-    get_number_users
+    get_number_users,
+    update_template
 )
 from .keyboards import kb_not_subscribed, kb_users
 from .constants import MAX_SYMBOLS
 from .config import (
-    CHECK_WORDS, 
     users_message_text, 
     plane_message_text, 
-    invalid_format_text
+    invalid_format_text,
+    file_change_text,
+    success_file_changed
 )
 from .long_pooll import BotsLongPollCust
-from .enums import CommandsEn, StatesEn
+from .enums import CommandsEn, StatesEn, CheckWordsEn, TemplateNames
 
 
 def client_handl(group_id: int, user_info: dict, vk: VkApiMethod) -> None:
@@ -57,9 +60,9 @@ def client_handl(group_id: int, user_info: dict, vk: VkApiMethod) -> None:
             keyboard=kb_not_subscribed()
         )
 
-def admin_handl(group_id: int, user_info: dict, message: str, state: str, vk: VkApiMethod) -> None:
+def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMethod) -> None:
     if state == StatesEn.PLANE_DIST:
-        parsed_datetime = parse_datetime(message=message)
+        parsed_datetime = parse_datetime(message=message['text'])
         if parsed_datetime:
             state[group_id] = ''
 
@@ -70,7 +73,11 @@ def admin_handl(group_id: int, user_info: dict, message: str, state: str, vk: Vk
                 second=parsed_datetime['second']
             )
 
-            uuid_job = add_job(group_id=group_id, datetime=datetime_)
+            uuid_job = add_job(
+                group_id=group_id, 
+                user_id=user_info['user_id'], 
+                datetime=datetime_
+            )
 
             vk.messages.send(
                 user_id=user_info['user_id'], 
@@ -89,10 +96,34 @@ def admin_handl(group_id: int, user_info: dict, message: str, state: str, vk: Vk
                 message=invalid_format_text
             )
         
-    if state == StatesEn.CHANGE:
-        ...
+    if message['text'] in TemplateNames and state == StatesEn.CHANGE:
+        state[group_id] = message['text']
 
-    if message == CommandsEn.USERS:
+        vk.messages.send(
+            user_id=user_info['user_id'], 
+            random_id=0,
+            message=file_change_text 
+        )
+    
+    if 'attachments' in message and state in TemplateNames:
+        for attachment in message['attachments']:
+            if attachment['type'] == 'doc':
+                new_template_text = get_file(file_url=attachment['doc']['url'])
+                update_template(
+                    group_id=group_id,
+                    field=state,
+                    text=new_template_text
+                )
+
+                state[group_id] = ''
+
+                vk.messages.send(
+                    user_id=user_info['user_id'], 
+                    random_id=0, 
+                    message=success_file_changed
+                )
+
+    if message['text'] == CommandsEn.USERS:
         number_user = get_number_users(group_id=group_id)
 
         vk.messages.send(
@@ -111,7 +142,7 @@ def start_event_loop():
     for event in longpool.listen():
         if event.type == VkBotEventType.MESSAGE_NEW:
             user_info = get_user_info(groups_api=groups_api, event=event)
-            if event.message['text'] in CHECK_WORDS:
+            if event.message['text'] in CheckWordsEn:
                 client_handl(
                     event.group_id, 
                     user_info, 

@@ -13,3 +13,13 @@ class StatesEn(StrEnum):
 class StatusesEn(StrEnum):
     PENDING = auto()
     CANCEL = auto()
+
+class CheckWordsEn(StrEnum):
+    BEGIN = 'Начать'
+    BEGIN_ENG = 'Start'
+    SUBSCRIBED = 'Подписался'
+
+class TemplateNames(StrEnum):
+    SUBSCRIBE = 'follow'
+    NOT_SUBSCRIBE = 'un_follow'
+    DISTRIBUTION = 'distribution'

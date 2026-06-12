@@ -43,6 +43,7 @@ class Job(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid: Mapped[str]
+    owner_id: Mapped[int]
     group_id: Mapped[int] = mapped_column(ForeignKey('groups.group_id', ondelete='CASCADE', onupdate='CASCADE'))
     run_at: Mapped[datetime]
     status: Mapped[str]

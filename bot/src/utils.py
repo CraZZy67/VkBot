@@ -1,3 +1,4 @@
+import requests
 from vk_api import VkApi
 from vk_api.vk_api import VkApiMethod
 
@@ -47,3 +48,8 @@ def parse_datetime(message: str) -> dict:
         }
     else:
         return {}
+
+def get_file(file_url: str) -> str:
+    response = requests.get(file_url)
+    response.encoding = 'utf-8'
+    return response.text
