@@ -1,7 +1,7 @@
 from vk_api.bot_longpoll import VkBotEventType
 from vk_api.vk_api import VkApiMethod
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from .utils import (
     form_api_dict, 
@@ -22,7 +22,7 @@ from .service import (
     get_job,
     update_job_status
 )
-from .keyboards import kb_not_subscribed, kb_users
+from .keyboards import kb_not_subscribed, kb_users, kb_templates
 from .constants import MAX_SYMBOLS
 from .config import (
     users_message_text, 
@@ -32,7 +32,9 @@ from .config import (
     success_file_changed_text,
     uuid_for_cancel_text,
     success_update_status_text,
-    not_success_update_status_text
+    not_success_update_status_text,
+    choose_templates_text,
+    plan_text
 )
 from .long_pooll import BotsLongPollCust
 from .enums import CommandsEn, StatesEn, CheckWordsEn, TemplateNames
@@ -75,6 +77,7 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
                 year=parsed_datetime['year'],
                 month=parsed_datetime['month'],
                 day=parsed_datetime['day'],
+                minute=parsed_datetime['minute'],
                 second=parsed_datetime['second']
             )
 
@@ -91,6 +94,7 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
                     uuid=uuid_job,
                     month=parsed_datetime['month'],
                     day=parsed_datetime['day'],
+                    minute=parsed_datetime['minute'],
                     second=parsed_datetime['second']
                 )
             )
@@ -101,7 +105,7 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
                 message=invalid_format_text
             )
         
-    if message['text'] in TemplateNames and state == StatesEn.CHANGE:
+    if message['text'] in TemplateNames:
         state[group_id] = message['text']
 
         vk.messages.send(
@@ -144,7 +148,6 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
                 message=not_success_update_status_text
             )
 
-
     if message['text'] == CommandsEn.USERS:
         number_user = get_number_users(group_id=group_id)
 
@@ -163,6 +166,44 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
             random_id=0,
             message=uuid_for_cancel_text
         )
+    
+    if message['text'] == CommandsEn.CHANGE:
+        vk.messages.send(
+            user_id=user_info['user_id'],
+            random_id=0,
+            message=choose_templates_text,
+            keyboard=kb_templates()
+        )
+    
+    if message['text'] == CommandsEn.PLANE_DIST:
+        state[group_id] == StatesEn.PLANE_DIST
+
+        vk.messages.send(
+            user_id=user_info['user_id'],
+            random_id=0,
+            message=plan_text,
+        )
+    
+    if message['text'] == CommandsEn.DIST_NOW:
+        now = datetime.now(timezone(timedelta(hours=3)))
+
+        add_job(
+            group_id=group_id, 
+            user_id=user_info['user_id'], 
+            datetime=now
+        )
+
+        vk.messages.send(
+            user_id=user_info['user_id'], 
+            random_id=0, 
+            message=plane_message_text.format(
+                uuid=uuid_job,
+                month=now.month,
+                day=now.day,
+                minute=now.minute,
+                second=now.second
+            )
+        )
 
 def start_event_loop():
     groups_api = form_api_dict(groups_info=get_groups())
@@ -175,9 +216,15 @@ def start_event_loop():
             user_info = get_user_info(groups_api=groups_api, event=event)
             if event.message['text'] in CheckWordsEn:
                 client_handl(
-                    event.group_id, 
-                    user_info, 
-                    groups_api[event.group_id].get_api()
+                    group_id=event.group_id, 
+                    user_info=user_info, 
+                    vk=groups_api[event.group_id].get_api()
                 )
             elif user_info['user_id'] in get_admins(group_id=event.group_id):
-                ...
+                admin_handl(
+                    group_id=event.group_id,
+                    user_info=user_info,
+                    message=event.message,
+                    state=states,
+                    vk=groups_api[event.group_id].get_api()
+                )

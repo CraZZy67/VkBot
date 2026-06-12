@@ -4,7 +4,8 @@ class CommandsEn(Enum):
     USERS = '/users'
     PLANE_DIST = 'Запланировать рассылку'
     DIST_NOW = 'Разослать сейчас'
-    CANCEL_DIST = 'Отменить рассылку'
+    CANCEL_DIST = 'Отменить рассылку',
+    CHANGE = '/change'
 
 class StatesEn(StrEnum):
     PLANE_DIST = auto()
