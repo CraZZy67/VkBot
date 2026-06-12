@@ -1,0 +1,15 @@
+from enum import Enum, StrEnum, auto
+
+class CommandsEn(Enum):
+    USERS = '/users'
+    PLANE_DIST = 'Запланировать рассылку'
+    DIST_NOW = 'Разослать сейчас'
+    CANCEL_DIST = 'Отменить рассылку'
+
+class StatesEn(StrEnum):
+    PLANE_DIST = auto()
+    CHANGE = auto()
+
+class StatusesEn(StrEnum):
+    PENDING = auto()
+    CANCEL = auto()

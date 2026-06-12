@@ -13,7 +13,6 @@ from .constants import (
     LOG_LEVEL
 )
 
-
 class Base(DeclarativeBase): 
     pass
 
@@ -25,3 +24,11 @@ else:
     engine = create_engine(connect_string)
 
 Session = sessionmaker(bind=engine)
+
+CHECK_WORDS = ('Начать', 'Start', 'Подписался')
+
+users_message_text = 'Пользователей в базе данных: {number}'
+plane_message_text = 'Рассылка запланирована ⌚\n\nuuid: {uuid}\ndate: {month}.{day}/{minute}:{second}'
+invalid_format_text = 'Не верный формат, попробуйте еще раз!'
+
+DATETIME_FORMAT = r'^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$'

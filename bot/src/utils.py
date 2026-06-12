@@ -1,6 +1,11 @@
 from vk_api import VkApi
 from vk_api.vk_api import VkApiMethod
 
+import re
+from datetime import datetime
+
+from .config import DATETIME_FORMAT
+
 
 def form_api_dict(groups_info: list[list[int, str]]) -> dict[int, VkApi]:
     api_dict = dict()
@@ -29,3 +34,16 @@ def get_user_info(groups_api: dict, event) -> dict:
 def user_is_follower(group_id: int, user_id: int, vk: VkApiMethod) -> bool:
     return True if vk.groups.isMember(group_id=group_id, user_id=user_id) else False
 
+def parse_datetime(message: str) -> dict:
+    match = re.fullmatch(DATETIME_FORMAT, message)
+
+    if match:
+        return {
+            'year': datetime.now().year,
+            'month': match.group(1),
+            'day': match.group(2),
+            'hour': match.group(3),
+            'second': match.group(4),
+        }
+    else:
+        return {}
