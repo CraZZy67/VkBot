@@ -82,3 +82,9 @@ def update_job_status(uuid: str, session: Session | None = None) -> None:
     stmt = update(Job).where(Job.uuid == uuid).values(status=StatusesEn.CANCEL)
 
     session.execute(stmt)
+
+@with_session
+def add_default_template(group_id: int, session: Session | None = None):
+    new_template = Template(group_id=group_id)
+
+    session.add(new_template)

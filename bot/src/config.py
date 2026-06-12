@@ -37,6 +37,8 @@ not_success_update_status_text = 'Не правильно введен uuid!'
 choose_templates_text = 'Выберите какой из текстов вам надо заменить.'
 plan_text = 'Теперь введите дату и время для планировки сообщения. В формате: DD.MM/HH:MM'
 
+not_groups_log_text = 'Группы в БД не обнаружены, запуск сервиса не возможен...'
+
 DATETIME_FORMAT = r'^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$'
 
 LOG_FORMAT = "%(levelname)s:%(message)s:%(pathname)s:%(funcName)s:%(lineno)d"
