@@ -1,4 +1,5 @@
 from vk_api import VkApi
+from vk_api.vk_api import VkApiMethod
 
 
 def form_api_dict(groups_info: list[list[int, str]]) -> dict[int, VkApi]:
@@ -24,3 +25,7 @@ def get_user_info(groups_api: dict, event) -> dict:
         "first_name": user_names[0].get("first_name"),
         "last_name": user_names[0].get("last_name")
     }
+
+def user_is_follower(group_id: int, user_id: int, vk: VkApiMethod) -> bool:
+    return True if vk.groups.isMember(group_id=group_id, user_id=user_id) else False
+

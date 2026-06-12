@@ -28,3 +28,10 @@ class Template(Base):
     subscribed: Mapped[str]
     not_subscribed: Mapped[str]
     distribution: Mapped[str]
+
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey('groups.group_id', ondelete='CASCADE', onupdate='CASCADE'))
+    user_id: Mapped[int]

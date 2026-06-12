@@ -12,3 +12,9 @@ DB_PORT = os.getenv('DB_PORT', '5432')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 DB_HOST_NAME = os.getenv('DB_HOST_NAME', 'db')
+
+CHECK_WORDS = ['Начать', 'Start', 'Подписался']
+
+ADMINS = os.getenv('ADMINS') + ''
+
+MAX_SYMBOLS = 4096
