@@ -18,7 +18,9 @@ from .service import (
     get_template, 
     add_job, 
     get_number_users,
-    update_template
+    update_template,
+    get_job,
+    update_job_status
 )
 from .keyboards import kb_not_subscribed, kb_users
 from .constants import MAX_SYMBOLS
@@ -27,7 +29,10 @@ from .config import (
     plane_message_text, 
     invalid_format_text,
     file_change_text,
-    success_file_changed
+    success_file_changed_text,
+    uuid_for_cancel_text,
+    success_update_status_text,
+    not_success_update_status_text
 )
 from .long_pooll import BotsLongPollCust
 from .enums import CommandsEn, StatesEn, CheckWordsEn, TemplateNames
@@ -120,8 +125,25 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
                 vk.messages.send(
                     user_id=user_info['user_id'], 
                     random_id=0, 
-                    message=success_file_changed
+                    message=success_file_changed_text
                 )
+
+    if state == StatesEn.CANCEL:
+        if get_job(uuid=message['text']):
+            update_job_status(uuid=message['text'])
+
+            vk.messages.send(
+                user_id=user_info['user_id'], 
+                random_id=0,
+                message=success_update_status_text
+            )
+        else:
+            vk.messages.send(
+                user_id=user_info['user_id'], 
+                random_id=0,
+                message=not_success_update_status_text
+            )
+
 
     if message['text'] == CommandsEn.USERS:
         number_user = get_number_users(group_id=group_id)
@@ -131,6 +153,15 @@ def admin_handl(group_id: int, user_info: dict, message, state: str, vk: VkApiMe
             random_id=0, 
             message=users_message_text.format(number=number_user), 
             keyboard=kb_users()
+        )
+    
+    if message['text'] == CommandsEn.CANCEL_DIST:
+        state[group_id] == StatesEn.CANCEL
+
+        vk.messages.send(
+            user_id=user_info['user_id'],
+            random_id=0,
+            message=uuid_for_cancel_text
         )
 
 def start_event_loop():

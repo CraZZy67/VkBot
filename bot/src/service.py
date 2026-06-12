@@ -36,7 +36,7 @@ def add_user(group_id: int, user_info: dict, session: Session | None = None) -> 
     session.add(new_user)
 
 @with_session
-def get_template(group_id: int, session: Session | None = None) -> Template:
+def get_template(group_id: int, session: Session | None = None) -> Template | None:
     stmt = select(Template).where(Template.group_id == group_id)
 
     return session.scalars(stmt).one_or_none()
@@ -69,4 +69,16 @@ def update_template(group_id: int, field: str, text: str, session: Session | Non
     else:
         stmt = update(Template).where(Template.group_id == group_id).values(distribution=text)
     
+    session.execute(stmt)
+
+@with_session
+def get_job(uuid: str, session: Session | None = None) -> Job | None:
+    stmt = select(Job).where(Job.uuid == uuid)
+
+    return session.scalars(stmt).one_or_none()
+
+@with_session
+def update_job_status(uuid: str, session: Session | None = None) -> None:
+    stmt = update(Job).where(Job.uuid == uuid).values(status=StatusesEn.CANCEL)
+
     session.execute(stmt)

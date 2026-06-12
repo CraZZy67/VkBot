@@ -30,7 +30,10 @@ users_message_text = 'Пользователей в базе данных: {numb
 plane_message_text = 'Рассылка запланирована ⌚\n\nuuid: {uuid}\ndate: {month}.{day}/{minute}:{second}'
 invalid_format_text = 'Не верный формат, попробуйте еще раз!'
 file_change_text = 'Отправте файл на который вы хотите заменить текст.'
-success_file_changed = 'Файл был успешно заменен!'
+success_file_changed_text = 'Файл был успешно заменен!'
+uuid_for_cancel_text = 'Введите uuid рассылки для ее отмены:'
+success_update_status_text = 'Рассылка отменена!'
+not_success_update_status_text = 'Не правильно введен uuid!'
 
 DATETIME_FORMAT = r'^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$'
 

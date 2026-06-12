@@ -9,6 +9,7 @@ class CommandsEn(Enum):
 class StatesEn(StrEnum):
     PLANE_DIST = auto()
     CHANGE = auto()
+    CANCEL = auto()
 
 class StatusesEn(StrEnum):
     PENDING = auto()
