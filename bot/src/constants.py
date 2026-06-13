@@ -1,4 +1,9 @@
+from dotenv import load_dotenv
+
 import os
+
+
+load_dotenv(override=True)
 
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 

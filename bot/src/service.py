@@ -1,18 +1,21 @@
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+import logging
 from datetime import datetime
 from uuid import uuid4
 
 from .wrappers import with_session
 from .models import Group, Admin, User, Template, Job
-from .enums import StatusesEn, TemplateNames
+from .enums import StatusesEn, TemplateNamesEn
 
+
+log = logging.getLogger(__name__)
 
 @with_session
 def get_groups(session: Session | None = None) -> list:
     stmt = select(Group.group_id, Group.token)
-    return session.scalars(stmt).all()
+    return session.execute(stmt).all()
 
 @with_session
 def get_admins(group_id: int, session: Session | None = None) -> list[int]:
@@ -22,7 +25,7 @@ def get_admins(group_id: int, session: Session | None = None) -> list[int]:
 @with_session
 def user_in_db(group_id: int, user_id: int, session: Session | None = None) -> bool:
     stmt = select(User.user_id).where(User.user_id == user_id, User.group_id == group_id)
-    return True if session.scalars(stmt).one_or_none else False
+    return True if session.scalars(stmt).one_or_none() else False
 
 @with_session
 def add_user(group_id: int, user_info: dict, session: Session | None = None) -> None:
@@ -36,10 +39,13 @@ def add_user(group_id: int, user_info: dict, session: Session | None = None) -> 
     session.add(new_user)
 
 @with_session
-def get_template(group_id: int, session: Session | None = None) -> Template | None:
-    stmt = select(Template).where(Template.group_id == group_id)
+def get_template(group_id: int, session: Session | None = None) -> list[str, str, str]:
+    stmt = select(
+        Template.subscribed,
+        Template.not_subscribed,
+    ).where(Template.group_id == group_id)
 
-    return session.scalars(stmt).one_or_none()
+    return session.execute(stmt).all()
 
 @with_session
 def get_number_users(group_id: int, session: Session | None = None) -> int:
@@ -53,7 +59,7 @@ def add_job(group_id: int, datetime: datetime, user_id: int, session: Session | 
         uuid=uuid_job,
         owner_id=user_id,
         group_id=group_id,
-        run_at=datetime,
+        run_at=datetime.isoformat(),
         status=StatusesEn.PENDING
     )
     
@@ -62,9 +68,12 @@ def add_job(group_id: int, datetime: datetime, user_id: int, session: Session | 
 
 @with_session
 def update_template(group_id: int, field: str, text: str, session: Session | None = None) -> None:
-    if field == TemplateNames.SUBSCRIBE:
+    log.debug(f'Field: {field}')
+    log.debug(f'sub: {field == TemplateNamesEn.SUBSCRIBE}')
+
+    if field == TemplateNamesEn.SUBSCRIBE:
         stmt = update(Template).where(Template.group_id == group_id).values(subscribed=text)
-    elif field == TemplateNames.NOT_SUBSCRIBE:
+    elif field == TemplateNamesEn.NOT_SUBSCRIBE:
         stmt = update(Template).where(Template.group_id == group_id).values(not_subscribed=text)
     else:
         stmt = update(Template).where(Template.group_id == group_id).values(distribution=text)

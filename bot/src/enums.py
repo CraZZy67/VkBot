@@ -2,10 +2,11 @@ from enum import Enum, StrEnum, auto
 
 class CommandsEn(Enum):
     USERS = '/users'
-    PLANE_DIST = 'Запланировать рассылку'
-    DIST_NOW = 'Разослать сейчас'
-    CANCEL_DIST = 'Отменить рассылку',
+    PLANE_DIST = 'Запланировать'
+    DIST_NOW = 'Разослать'
+    CANCEL_DIST = 'Отменить'
     CHANGE = '/change'
+    CLEAR = '/clear'
 
 class StatesEn(StrEnum):
     PLANE_DIST = auto()
@@ -21,7 +22,7 @@ class CheckWordsEn(StrEnum):
     BEGIN_ENG = 'Start'
     SUBSCRIBED = 'Подписался'
 
-class TemplateNames(StrEnum):
+class TemplateNamesEn(StrEnum):
     SUBSCRIBE = 'follow'
     NOT_SUBSCRIBE = 'un_follow'
     DISTRIBUTION = 'distribution'

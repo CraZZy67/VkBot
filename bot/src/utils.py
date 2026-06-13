@@ -2,16 +2,21 @@ import requests
 from vk_api import VkApi
 from vk_api.vk_api import VkApiMethod
 
+import logging
 import re
 from datetime import datetime
 
 from .config import DATETIME_FORMAT
 
 
+log = logging.getLogger(__name__)
+
 def form_api_dict(groups_info: list[list[int, str]]) -> dict[int, VkApi]:
     api_dict = dict()
 
     for info in groups_info:
+        log.debug(f'Объект группы: {info}')
+
         api_dict[info[0]] = VkApi(token=info[1])
     
     return api_dict
@@ -44,7 +49,7 @@ def parse_datetime(message: str) -> dict:
             'month': match.group(1),
             'day': match.group(2),
             'hour': match.group(3),
-            'second': match.group(4),
+            'minute': match.group(4),
         }
     else:
         return {}
