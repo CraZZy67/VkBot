@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+import sys
 
 from .event_loop import start_event_loop
 from .config import Base, engine, not_groups_log_text
@@ -11,9 +12,13 @@ log = logging.getLogger(__name__)
 
 def check_groups():
     while True:
-        groups = get_groups()
+        try:
+            groups = get_groups()
+        except Exception as ex:
+            log.exception(f"Error while fetching groups {ex}")
+            raise
 
-        if not len(groups):
+        if not groups:
             log.info(not_groups_log_text)
         else:
             break
@@ -36,7 +41,12 @@ def main():
     create_templates()
 
     log.info('Сервис запущен!')
-    start_event_loop()
+
+    try:
+        start_event_loop()
+    except Exception:
+        log.exception("Fatal error during initialization")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

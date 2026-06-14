@@ -2,10 +2,14 @@ import requests
 from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent
 
+import logging
+
+
+log = logging.getLogger(__name__)
 
 class BotsLongPollCust(VkBotLongPoll):
 
-    def __init__(self, bot_creds: dict[int, VkApi], wait=25):
+    def __init__(self, bot_creds: dict[int, VkApi], wait=5):
         self.bot_creds = bot_creds
         self.wait = wait
 
@@ -51,7 +55,7 @@ class BotsLongPollCust(VkBotLongPoll):
             }
 
             response = self.session.get(
-                self.url,
+                bot_info['server'],
                 params=values,
                 timeout=self.wait + 10
             ).json()
@@ -63,13 +67,14 @@ class BotsLongPollCust(VkBotLongPoll):
                     for raw_event in response['updates']
                 ])
 
-            elif response['failed'] == 1:
-                bot_info['ts'] = response['ts']
+            elif response.get('failed') == 1:
+                bot_info['ts'] = response.get('ts')
 
-            elif response['failed'] == 2:
+            elif response.get('failed') == 2:
                 self.update_longpoll_server(update_ts=False)
 
-            elif response['failed'] == 3:
+            elif response.get('failed') == 3:
                 self.update_longpoll_server()
         
+        log.debug(f'event list: {event_list}')
         return event_list

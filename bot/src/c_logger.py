@@ -4,7 +4,7 @@ import logging
 from .constants import LOG_LEVEL
 
 
-LOG_FORMAT = "%(levelname)s :: %(message)s :: %(pathname)s:%(funcName)s:%(lineno)d"
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s (%(pathname)s:%(lineno)d)"
 
 class LogLevelsEn(StrEnum):
     info = "INFO"

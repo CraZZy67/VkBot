@@ -232,25 +232,29 @@ def start_event_loop():
     states = {}
 
     for event in longpool.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW:
-            user_info = get_user_info(groups_api=groups_api, event=event)
+        try:
+            if event.type == VkBotEventType.MESSAGE_NEW:
+                user_info = get_user_info(groups_api=groups_api, event=event)
 
-            group_api = groups_api[event.group_id].get_api()
-            log.debug(f'Group: {event.group_id}, API: {group_api}')
-            log.debug(f'User: {user_info["user_id"]}, admins: {get_admins(group_id=event.group_id)}')
+                group_api = groups_api[event.group_id].get_api()
+                log.debug(f'Group: {event.group_id}, API: {group_api}')
+                log.debug(f'User: {user_info["user_id"]}, admins: {get_admins(group_id=event.group_id)}')
 
-            if event.message['text'] in CheckWordsEn:
-                client_handl(
-                    group_id=event.group_id, 
-                    user_info=user_info, 
-                    vk=group_api
-                )
-            elif int(user_info['user_id']) in get_admins(group_id=event.group_id):
-                log.debug(f'In admin')
-                admin_handl(
-                    group_id=event.group_id,
-                    user_info=user_info,
-                    message=event.message,
-                    states=states,
-                    vk=group_api
-                )
+                if event.message['text'] in CheckWordsEn:
+                    client_handl(
+                        group_id=event.group_id, 
+                        user_info=user_info, 
+                        vk=group_api
+                    )
+                elif int(user_info['user_id']) in get_admins(group_id=event.group_id):
+                    log.debug(f'In admin')
+                    admin_handl(
+                        group_id=event.group_id,
+                        user_info=user_info,
+                        message=event.message,
+                        states=states,
+                        vk=group_api
+                    )
+        except Exception as ex:
+            log.exception(f'Error in event loop: {ex} group: {event.group_id}')
+            continue
