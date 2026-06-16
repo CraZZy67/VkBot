@@ -4,7 +4,7 @@ services:
       container_name: bot
       restart: unless-stopped
       env_file:
-        - bot/.env
+        - .env
       depends_on:
         - db
     
@@ -17,7 +17,7 @@ services:
       env_file:
         - .env
       volumes:
-        - pgdata:/var/lib/postgresql/MAJOR/docker
+        - pgdata:/var/lib/postgresql/18/docker
 
   adminer:
       image: adminer
