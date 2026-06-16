@@ -46,8 +46,8 @@ def parse_datetime(message: str) -> dict:
     if match:
         return {
             'year': datetime.now().year,
-            'month': match.group(1),
-            'day': match.group(2),
+            'day': match.group(1),
+            'month': match.group(2),
             'hour': match.group(3),
             'minute': match.group(4),
         }

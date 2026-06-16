@@ -1,9 +1,11 @@
 from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
 from datetime import datetime
 
 from .config import Base
+from .enums import JobStatusesEn
 
 
 class Group(Base):
@@ -46,4 +48,4 @@ class Job(Base):
     owner_id: Mapped[int]
     group_id: Mapped[int] = mapped_column(ForeignKey('groups.group_id', ondelete='CASCADE', onupdate='CASCADE'))
     run_at: Mapped[datetime]
-    status: Mapped[str]
+    status: Mapped[JobStatusesEn] = mapped_column(ENUM(JobStatusesEn, name='job_statuses', create_type=True), nullable=False)

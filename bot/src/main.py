@@ -31,6 +31,7 @@ def create_templates():
     for group in groups:
         if not get_template(group_id=group[0]):
             add_default_template(group_id=group[0])
+            log.info(f'Шаблоны по умолчанию для группы {group[0]} созданы')
 
 def main():
     configure_logging()
@@ -44,8 +45,8 @@ def main():
 
     try:
         start_event_loop()
-    except Exception:
-        log.exception("Fatal error during initialization")
+    except Exception as ex:
+        log.exception(f"Фатальная ошибка при инциализации: {ex}")
         sys.exit(1)
 
 if __name__ == '__main__':

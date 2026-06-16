@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class BotsLongPollCust(VkBotLongPoll):
 
-    def __init__(self, bot_creds: dict[int, VkApi], wait=5):
+    def __init__(self, bot_creds: dict[int, VkApi], wait=10):
         self.bot_creds = bot_creds
         self.wait = wait
 

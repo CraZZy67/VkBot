@@ -27,7 +27,7 @@ else:
 Session = sessionmaker(bind=engine)
 
 users_message_text = 'Пользователей в базе данных: {number}'
-plane_message_text = 'Рассылка запланирована ⌚\n\nuuid: {uuid}\ndate: {month}.{day}/{hour}:{minute}'
+plane_message_text = 'Рассылка запланирована ⌚\n\nuuid: {uuid}\nДата и время: {day}.{month}/{hour}:{minute}'
 invalid_format_text = 'Не верный формат, попробуйте еще раз!'
 file_change_text = 'Отправте файл на который вы хотите заменить текст.'
 success_file_changed_text = 'Файл был успешно заменен!'

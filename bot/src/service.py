@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from .wrappers import with_session
 from .models import Group, Admin, User, Template, Job
-from .enums import StatusesEn, TemplateNamesEn
+from .enums import JobStatusesEn, TemplateNamesEn
 
 
 log = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def add_job(group_id: int, datetime: datetime, user_id: int, session: Session | 
         owner_id=user_id,
         group_id=group_id,
         run_at=datetime.isoformat(),
-        status=StatusesEn.PENDING
+        status=JobStatusesEn.PENDING
     )
     
     session.add(new_job)
@@ -88,7 +88,7 @@ def get_job(uuid: str, session: Session | None = None) -> Job | None:
 
 @with_session
 def update_job_status(uuid: str, session: Session | None = None) -> None:
-    stmt = update(Job).where(Job.uuid == uuid).values(status=StatusesEn.CANCEL)
+    stmt = update(Job).where(Job.uuid == uuid).values(status=JobStatusesEn.CANCEL)
 
     session.execute(stmt)
 

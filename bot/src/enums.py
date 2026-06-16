@@ -13,10 +13,6 @@ class StatesEn(StrEnum):
     CHANGE = auto()
     CANCEL = auto()
 
-class StatusesEn(StrEnum):
-    PENDING = auto()
-    CANCEL = auto()
-
 class CheckWordsEn(StrEnum):
     BEGIN = 'Начать'
     BEGIN_ENG = 'Start'
@@ -26,3 +22,10 @@ class TemplateNamesEn(StrEnum):
     SUBSCRIBE = 'follow'
     NOT_SUBSCRIBE = 'un_follow'
     DISTRIBUTION = 'distribution'
+
+class JobStatusesEn(StrEnum):
+    PENDING = auto()
+    QUEUE = auto()
+    PROCESS = auto()
+    DONE = auto()
+    CANCEL = auto()
