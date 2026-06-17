@@ -3,13 +3,13 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .c_logger import LogLevelsEn
 from .constants import (
-    DB_DRIVER,
-    DB_HOST_NAME,
-    DB_NAME,
-    DB_PASSWORD,
-    DB_PORT,
-    DB_SYSTEM,
-    DB_USER,
+    POSTGRES_DRIVER,
+    POSTGRES_HOST_NAME,
+    POSTGRES_NAME,
+    POSTGRES_PASSWORD,
+    POSTGRES_PORT,
+    POSTGRES_SYSTEM,
+    POSTGRES_USER,
     LOG_LEVEL
 )
 
@@ -17,7 +17,7 @@ from .constants import (
 class Base(DeclarativeBase): 
     pass
 
-connect_string = f'{DB_SYSTEM}+{DB_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST_NAME}:{DB_PORT}/{DB_NAME}'
+connect_string = f'{POSTGRES_SYSTEM}+{POSTGRES_DRIVER}://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST_NAME}:{POSTGRES_PORT}/{POSTGRES_NAME}'
 
 if LOG_LEVEL == LogLevelsEn.debug.value:
     engine = create_engine(connect_string, echo=True)

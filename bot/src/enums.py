@@ -1,5 +1,6 @@
 from enum import Enum, StrEnum, auto
 
+
 class CommandsEn(Enum):
     USERS = '/users'
     PLANE_DIST = 'Запланировать'

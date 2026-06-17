@@ -10,10 +10,6 @@ POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
 POSTGRES_DB = os.getenv('POSTGRES_DB', 'postgres')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
 
-EVENT_WAIT = os.getenv('EVENT_WAIT', 10)
-
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 
 POSTGRES_HOST_NAME = os.getenv('POSTGRES_HOST_NAME', 'db')
-
-MAX_SYMBOLS = 4096
