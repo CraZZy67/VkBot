@@ -2,6 +2,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from .enums import CommandsEn, CheckWordsEn, TemplateNamesEn
 
+
 def kb_not_subscribed():
     kb = VkKeyboard(one_time=False, inline=True)
     kb.add_button(color=VkKeyboardColor.POSITIVE, label=CheckWordsEn.SUBSCRIBED)
