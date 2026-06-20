@@ -9,7 +9,14 @@ POSTGRES_DRIVER = 'psycopg2'
 POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
 POSTGRES_DB = os.getenv('POSTGRES_DB', 'postgres')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
-
 POSTGRES_HOST_NAME = os.getenv('POSTGRES_HOST_NAME', 'db')
+
+MIN_DIFF_MNNUTE = os.getenv('MIN_DIFF_MINUTE', '60')
+
+SECONDS_IN_MINUTE = 60
+
+REDIS_HOST_NAME = os.getenv('REDIS_HOST_NAME', 'redis')
+REDIS_PORT = os.getenv('REDIS_PORT', '6379')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+REDIS_QUEUE_NAME = os.getenv('REDIS_QUEUE_NAME', 'jobs')

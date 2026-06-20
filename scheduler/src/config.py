@@ -1,5 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from redis import Redis
+
 
 from .constants import (
     POSTGRES_DRIVER,
@@ -9,6 +11,9 @@ from .constants import (
     POSTGRES_PORT,
     POSTGRES_SYSTEM,
     POSTGRES_USER,
+    REDIS_HOST_NAME,
+    REDIS_PASSWORD,
+    REDIS_PORT,
     LOG_LEVEL
 )
 from .c_logger import LogLevelsEn
@@ -25,3 +30,10 @@ else:
     engine = create_engine(connect_string)
 
 Session = sessionmaker(bind=engine)
+
+redis = Redis(
+    host=REDIS_HOST_NAME,
+    port=REDIS_PORT,
+    password=REDIS_PASSWORD,
+    decode_responses=True
+)
