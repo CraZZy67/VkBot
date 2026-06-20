@@ -2,11 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from redis import Redis
 
-
 from .constants import (
     POSTGRES_DRIVER,
     POSTGRES_HOST_NAME,
-    POSTGRES_NAME,
+    POSTGRES_DB,
     POSTGRES_PASSWORD,
     POSTGRES_PORT,
     POSTGRES_SYSTEM,
@@ -22,7 +21,7 @@ from .c_logger import LogLevelsEn
 class Base(DeclarativeBase): 
     pass
 
-connect_string = f'{POSTGRES_SYSTEM}+{POSTGRES_DRIVER}://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST_NAME}:{POSTGRES_PORT}/{POSTGRES_NAME}'
+connect_string = f'{POSTGRES_SYSTEM}+{POSTGRES_DRIVER}://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST_NAME}:{POSTGRES_PORT}/{POSTGRES_DB}'
 
 if LOG_LEVEL == LogLevelsEn.debug.value:
     engine = create_engine(connect_string, echo=True)

@@ -7,7 +7,25 @@ services:
         - .env
       depends_on:
         - db
-    
+  
+  scheduler:
+      build: ./scheduler
+      container_name: scheduler
+      restart: unless-stopped
+      env_file:
+        - .env
+      depends_on:
+        - db
+        - redis
+  
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
   db:
       image: postgres
       container_name: db
@@ -30,3 +48,4 @@ services:
 
 volumes:
   pgdata:
+  redis_data:
