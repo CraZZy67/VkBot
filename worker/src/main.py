@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 def main():
     configure_logging()
     log.info('Сервис запущен!')
-    c
-
+    start_loop()
+    
 if __name__ == '__main__':
     main()
