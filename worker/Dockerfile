@@ -5,4 +5,4 @@ WORKDIR /root
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT [ "python", "-m", "src.worker" ]
+ENTRYPOINT [ "python", "-m", "src.main" ]

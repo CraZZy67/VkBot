@@ -14,7 +14,6 @@ POSTGRES_HOST_NAME = os.getenv('POSTGRES_HOST_NAME', 'db')
 
 REDIS_HOST_NAME = os.getenv('REDIS_HOST_NAME', 'redis')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 REDIS_QUEUE_NAME = os.getenv('REDIS_QUEUE_NAME', 'jobs')
 
 WORKER_LOOP_WAIT = os.getenv('WORKER_LOOP_WAIT', '30')

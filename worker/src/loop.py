@@ -16,58 +16,73 @@ from .service import (
     del_users, 
     update_status
 )
-from .config import redis, feedback_text
+from .config import redis, feedback_text, error_feedback_text, Session
 from .constants import REDIS_QUEUE_NAME, WORKER_LOOP_WAIT, MAX_SYMBOLS
 from .enums import JobStatusesEn
 
 
 log = logging.getLogger(__name__)
 
-def job_handl(job: dict) -> None:
+def job_handl(job: dict, vk: VkApi, job_info: list) -> None:
     template = get_template(job['group_id'])
-    vk = VkApi(token=get_group_token(job['group_id'])).get_api()
     blocked_users = []
 
     update_status(job['uuid'], JobStatusesEn.PROCESS.value)
     log.info(f'Запуск рассылки задачи {job['uuid']}, группы {job['group_id']}')
 
-    for user in get_users(job['group_id']):
-        template = format_template(template, user)
+    session = Session()
+    try:
+        for user in get_users(job['group_id'], session=session):
+            formatted_template = format_template(template, user)
 
-        template_parts = ceil(len(template) / MAX_SYMBOLS)
+            template_parts = ceil(len(formatted_template) / MAX_SYMBOLS)
+            log.debug(f'Template parts: {template_parts}, template: {formatted_template}')
+            try:
+                for i in range(0, template_parts):
+                    vk.messages.send(
+                        user_id=user.user_id, 
+                        random_id=0,
+                        message=formatted_template[i * MAX_SYMBOLS:(i + 1) * MAX_SYMBOLS]
+                    )
+            except ApiError as ex:
+                if ex.code == 901:
+                    blocked_users.append(user.user_id)
+                    log.info(f'Пользователь {user.user_id} заблокировал бота')
+                else:
+                    log.exception(f'Ошибка отправки сообщения: {ex}')
 
-        try:
-            for i in range(0, template_parts):
-                vk.messages.send(
-                    user_id=user.user_id, 
-                    random_id=0,
-                    message=template[i * MAX_SYMBOLS:(i + 1) * MAX_SYMBOLS]
-                )
-        except ApiError as ex:
-            if ex.code == 901:
-                blocked_users.append(user.user_id)
-                log.info(f'Пользователь {user.user_id} заблокировал бота')
-            else:
-                log.exception(f'Ошибка отправки сообщения: {ex}')
+            log.info(f'Сообщение пользователю {user.user_id} отправлено')
+    finally:
+        session.commit()
+        session.close()
 
-        log.info(f'Сообщение пользователю {user.user_id} отправлено')
-    
-    del_users(job['group_id'], blocked_users)
+    if blocked_users:
+        del_users(job['group_id'], blocked_users)
+
     update_status(job['uuid'], JobStatusesEn.DONE.value)
 
     log.info(f'Рассылка задачи {job['uuid']}, группы {job['group_id']} завершена!')
 
-    job_info = get_job_info(job['uuid'])
     vk.messages.send(user_id=job_info[0], random_id=0,
                         message=feedback_text.format(date=job_info[1], count=len(blocked_users)))
 
 def start_loop() -> None:
     while True:
         log.info('Ожидание задачи...')
+
+        job = json.loads(redis.brpop(REDIS_QUEUE_NAME)[1])
+        job_info = get_job_info(job['uuid'])
+
+        vk = VkApi(token=get_group_token(job['group_id'])).get_api()
+
         try:
-            job = json.loads(redis.brpop(REDIS_QUEUE_NAME)[1])
-            job_handl(job)
+            job_handl(job, vk, job_info)
         except Exception as ex:
             log.exception(f'Ошибка при обработки задачи {job['uuid']}: {ex}')
+
+            update_status(job['uuid'], JobStatusesEn.DONE.value)
+
+            vk.messages.send(user_id=job_info[0], random_id=0,
+                             message=error_feedback_text.format(date=job_info[1]))
 
         sleep(float(WORKER_LOOP_WAIT))

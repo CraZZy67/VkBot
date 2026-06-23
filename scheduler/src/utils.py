@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from .constants import SECONDS_IN_MINUTE, MIN_DIFF_MNNUTE
+from .enums import JobStatusesEn
 
 
 def check_diff(current_datetime: datetime, check_datetime: datetime) -> bool:
@@ -14,7 +15,7 @@ def check_diff(current_datetime: datetime, check_datetime: datetime) -> bool:
 
 def check_current_job(current_job: tuple, jobs: list) -> bool:
     for check_job in jobs:
-        if current_job[1] != check_job[1]:
+        if current_job[1] != check_job[1] and check_job[3] != JobStatusesEn.DONE.value:
             if not check_diff(current_job[2], check_job[2]):
                 return False
     return True

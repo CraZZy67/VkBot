@@ -11,7 +11,6 @@ from .constants import (
     POSTGRES_SYSTEM,
     POSTGRES_USER,
     REDIS_HOST_NAME,
-    REDIS_PASSWORD,
     REDIS_PORT,
     LOG_LEVEL
 )
@@ -33,8 +32,8 @@ Session = sessionmaker(bind=engine)
 redis = Redis(
     host=REDIS_HOST_NAME,
     port=REDIS_PORT,
-    password=REDIS_PASSWORD,
     decode_responses=True
 )
 
-feedback_text = "Сообщение запланированое на дату {date} было разослано. Удалено пользователей из БД: {count}"
+feedback_text = 'Рассылка запланированая на дату: \n({date}) была разослана. \nУдалено пользователей из БД: {count}'
+error_feedback_text = 'Рассылка запланированая на дату \n({date}), завершилась ошибкой'

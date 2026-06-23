@@ -19,12 +19,12 @@ def get_users(group_id: int, session: Session | None = None) -> list[User]:
 @with_session
 def get_template(group_id: int, session: Session | None = None) -> str:
     stmt = select(Template.distribution).where(Template.group_id == group_id)
-    return session.execute(stmt).one()[0][0]
+    return session.execute(stmt).one()[0]
 
 @with_session
 def get_group_token(group_id: int, session: Session | None = None) -> str:
     stmt = select(Group.token).where(Group.group_id == group_id)
-    return session.execute(stmt).one()[0][0]
+    return session.execute(stmt).one()[0]
 
 @with_session
 def del_users(group_id: int, users: list, session: Session | None = None) -> None:
@@ -34,7 +34,7 @@ def del_users(group_id: int, users: list, session: Session | None = None) -> Non
 @with_session
 def get_job_info(uuid: str, session: Session | None = None) -> list[int, datetime]:
     stmt = select(Job.owner_id, Job.run_at).where(Job.uuid == uuid)
-    return session.execute(stmt).one()[0]
+    return session.execute(stmt).one()
 
 @with_session
 def update_status(uuid: str, status: JobStatusesEn, session: Session | None = None) -> None:
