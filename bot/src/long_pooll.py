@@ -3,6 +3,9 @@ from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent
 
 import logging
+from time import sleep
+
+from .constants import EVENT_WAIT
 
 
 log = logging.getLogger(__name__)
@@ -78,3 +81,8 @@ class BotsLongPollCust(VkBotLongPoll):
         
         log.debug(f'event list: {event_list}')
         return event_list
+    
+    def listen(self):
+        while True:
+            sleep(float(EVENT_WAIT))
+            yield from self.check()

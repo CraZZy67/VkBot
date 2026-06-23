@@ -17,7 +17,7 @@ from .service import (
     update_status
 )
 from .config import redis, feedback_text, error_feedback_text, Session
-from .constants import REDIS_QUEUE_NAME, WORKER_LOOP_WAIT, MAX_SYMBOLS
+from .constants import REDIS_QUEUE_NAME, WORKER_LOOP_WAIT, MAX_SYMBOLS, DIST_DELAY
 from .enums import JobStatusesEn
 
 
@@ -52,6 +52,7 @@ def job_handl(job: dict, vk: VkApi, job_info: list) -> None:
                     log.exception(f'Ошибка отправки сообщения: {ex}')
 
             log.info(f'Сообщение пользователю {user.user_id} отправлено')
+            sleep(DIST_DELAY)
     finally:
         session.commit()
         session.close()

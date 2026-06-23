@@ -175,7 +175,7 @@ def admin_states_handl(group_id: int, user_info: dict, message, states: dict, vk
                     random_id=0,
                     message='Задача в процессе обработки, нельзя отменить!'
                 )
-                
+
                 states[group_id] = ''
         else:
             vk.messages.send(
@@ -275,7 +275,7 @@ def admin_handl(group_id: int, user_info: dict, message, states: dict, vk: VkApi
 
 def start_event_loop():
     groups_api = form_api_dict(groups_info=get_groups())
-    longpool = BotsLongPollCust(bot_creds=groups_api, wait=int(EVENT_WAIT))
+    longpool = BotsLongPollCust(bot_creds=groups_api, wait=0)
 
     states = {}
 
