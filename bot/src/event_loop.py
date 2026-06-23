@@ -39,7 +39,13 @@ from .config import (
     plan_text
 )
 from .long_pooll import BotsLongPollCust
-from .enums import CommandsEn, StatesEn, CheckWordsEn, TemplateNamesEn
+from .enums import (
+    CommandsEn, 
+    StatesEn, 
+    CheckWordsEn, 
+    TemplateNamesEn,
+    JobStatusesEn
+)
 
 
 log = logging.getLogger(__name__)
@@ -149,18 +155,28 @@ def admin_states_handl(group_id: int, user_info: dict, message, states: dict, vk
 
     # cancel distribution state handling
     elif states.get(group_id) == StatesEn.CANCEL:
-        if get_job(uuid=message['text']):
-            update_job_status(uuid=message['text'])
+        job = get_job(uuid=message['text'])
+        if job:
+            if job.status not in (JobStatusesEn.QUEUE, JobStatusesEn.PROCESS):
+                update_job_status(uuid=message['text'])
 
-            log.info(f'[{group_id}] Рассылка {message['text']}, была отменена')
+                log.info(f'[{group_id}] Рассылка {message['text']}, была отменена')
 
-            vk.messages.send(
-                user_id=user_info['user_id'], 
-                random_id=0,
-                message=success_update_status_text
-            )
+                vk.messages.send(
+                    user_id=user_info['user_id'], 
+                    random_id=0,
+                    message=success_update_status_text
+                )
 
-            states[group_id] = ''
+                states[group_id] = ''
+            else:
+                vk.messages.send(
+                    user_id=user_info['user_id'], 
+                    random_id=0,
+                    message='Задача в процессе обработки, нельзя отменить!'
+                )
+                
+                states[group_id] = ''
         else:
             vk.messages.send(
                 user_id=user_info['user_id'], 
