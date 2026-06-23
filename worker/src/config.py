@@ -36,3 +36,5 @@ redis = Redis(
     password=REDIS_PASSWORD,
     decode_responses=True
 )
+
+feedback_text = "Сообщение запланированое на дату {date} было разослано. Удалено пользователей из БД: {count}"

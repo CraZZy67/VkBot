@@ -2,6 +2,7 @@ from datetime import datetime
 
 from .constants import SECONDS_IN_MINUTE, MIN_DIFF_MNNUTE
 
+
 def check_diff(current_datetime: datetime, check_datetime: datetime) -> bool:
     time_del = check_datetime - current_datetime
 
