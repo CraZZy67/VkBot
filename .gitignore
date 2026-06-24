@@ -302,5 +302,6 @@ pyvenv.cfg
 pip-selfcheck.json
 
 .vscode/
+migrate/data
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,venv,dotenv
