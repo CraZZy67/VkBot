@@ -27,14 +27,6 @@ services:
       - db
       - redis
   
-  migrate:
-    build: ./migrate
-    container_name: migrate
-    env_file:
-      - .env
-    depends_on:
-      - db
-  
   redis:
     image: redis:7-alpine
     container_name: redis
