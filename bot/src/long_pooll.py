@@ -1,5 +1,6 @@
 import requests
 from vk_api import VkApi
+from vk_api.exceptions import ApiError
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent
 
 import logging
@@ -36,7 +37,10 @@ class BotsLongPollCust(VkBotLongPoll):
                 'group_id': id_
             }
 
-            response = self.bot_creds[id_].method('groups.getLongPollServer', values)
+            try:
+                response = self.bot_creds[id_].method('groups.getLongPollServer', values)
+            except ApiError as ex:
+                log.exception(f'Ошибка получения long_poll сервера для группы {id_}: {ex}')
 
             self.lng_pool_bots_info[id_]['key'] = response['key']
             self.lng_pool_bots_info[id_]['server'] = response['server']
