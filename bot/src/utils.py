@@ -17,7 +17,11 @@ def form_api_dict(groups_info: list[list[int, str]]) -> dict[int, VkApi]:
     for info in groups_info:
         log.debug(f'Объект группы: {info}')
 
-        api_dict[info[0]] = VkApi(token=info[1])
+        try:
+            api_dict[info[0]] = VkApi(token=info[1])
+        except Exception as ex:
+            log.exception(f'Ошибка формирования API группы {info[0]}: {ex}')
+            continue
     
     return api_dict
 
