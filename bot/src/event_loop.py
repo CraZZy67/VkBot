@@ -72,7 +72,7 @@ def client_handl(group_id: int, user_info: dict, vk: VkApiMethod) -> None:
                 message=subscribed[i * MAX_SYMBOLS:(i + 1) * MAX_SYMBOLS]
             )
     else:
-        not_subscribed = group_template.not_subscribed[1]
+        not_subscribed = group_template[1]
 
         vk.messages.send(
             user_id=user_info['user_id'], 
