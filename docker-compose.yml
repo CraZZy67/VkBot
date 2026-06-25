@@ -23,6 +23,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    deploy:
+      replicas: 5
     depends_on:
       - db
       - redis
