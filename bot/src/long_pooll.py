@@ -41,6 +41,7 @@ class BotsLongPollCust(VkBotLongPoll):
                 response = self.bot_creds[id_].method('groups.getLongPollServer', values)
             except ApiError as ex:
                 log.exception(f'Ошибка получения long_poll сервера для группы {id_}: {ex}')
+                self.lng_pool_bots_info.pop(id_)
                 continue
 
             self.lng_pool_bots_info[id_]['key'] = response['key']
