@@ -70,18 +70,20 @@ def job_handl(job: dict, vk: VkApi, job_info: list) -> None:
 def start_loop() -> None:
     while True:
         log.info('Ожидание задачи...')
-
-        job = json.loads(redis.brpop(REDIS_QUEUE_NAME)[1])
-        job_info = get_job_info(job['uuid'])
-
-        vk = VkApi(token=get_group_token(job['group_id'])).get_api()
+        
+        job = redis.brpop(REDIS_QUEUE_NAME)[1]
 
         try:
+            json_job = json.loads(job)
+            job_info = get_job_info(json_job['uuid'])
+
+            vk = VkApi(token=get_group_token(json_job['group_id'])).get_api()
+
             job_handl(job, vk, job_info)
         except Exception as ex:
-            log.exception(f'Ошибка при обработки задачи {job['uuid']}: {ex}')
+            log.exception(f'Ошибка при обработки задачи {json_job['uuid']}: {ex}')
 
-            update_status(job['uuid'], JobStatusesEn.DONE.value)
+            update_status(json_job['uuid'], JobStatusesEn.DONE.value)
 
             vk.messages.send(user_id=job_info[0], random_id=0,
                              message=error_feedback_text.format(date=job_info[1]))
