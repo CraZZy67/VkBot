@@ -79,7 +79,7 @@ def start_loop() -> None:
 
             vk = VkApi(token=get_group_token(json_job['group_id'])).get_api()
 
-            job_handl(job, vk, job_info)
+            job_handl(json_job, vk, job_info)
         except Exception as ex:
             log.exception(f'Ошибка при обработки задачи {json_job['uuid']}: {ex}')
 
