@@ -13,7 +13,7 @@ from .constants import REDIS_QUEUE_NAME, SCHEDULER_LOOP_WAIT
 log = logging.getLogger(__name__)
 
 def jobs_handl(group_id: int, jobs: list[tuple]) -> None:
-    for current_job in jobs:
+    for current_job in jobs.copy():
         job_datetime = current_job[2].replace(tzinfo=timezone(timedelta(hours=3)))
 
         if current_job[3] in (JobStatusesEn.CANCEL, JobStatusesEn.DONE):

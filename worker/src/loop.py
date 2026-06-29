@@ -44,14 +44,16 @@ def job_handl(job: dict, vk: VkApi, job_info: list) -> None:
                         random_id=0,
                         message=formatted_template[i * MAX_SYMBOLS:(i + 1) * MAX_SYMBOLS]
                     )
+                log.info(f'Сообщение пользователю {user.user_id} отправлено')
             except ApiError as ex:
                 if ex.code == 901:
                     blocked_users.append(user.user_id)
                     log.info(f'Пользователь {user.user_id} заблокировал бота')
                 else:
                     log.exception(f'Ошибка отправки сообщения: {ex}')
+            except ConnectionError as ex:
+                log.exception(f'Проблема с установкой соединения: {ex}')
 
-            log.info(f'Сообщение пользователю {user.user_id} отправлено')
             sleep(DIST_DELAY)
     finally:
         session.commit()
