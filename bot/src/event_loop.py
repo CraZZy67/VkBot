@@ -25,7 +25,7 @@ from .service import (
     update_job_status
 )
 from .keyboards import kb_not_subscribed, kb_users, kb_templates
-from .constants import MAX_SYMBOLS, EVENT_WAIT
+from .constants import MAX_SYMBOLS
 from .config import (
     users_message_text, 
     plane_message_text, 
@@ -36,7 +36,8 @@ from .config import (
     success_update_status_text,
     not_success_update_status_text,
     choose_templates_text,
-    plan_text
+    plan_text,
+    Session
 )
 from .long_pooll import BotsLongPollCust
 from .enums import (
@@ -155,34 +156,39 @@ def admin_states_handl(group_id: int, user_info: dict, message, states: dict, vk
 
     # cancel distribution state handling
     elif states.get(group_id) == StatesEn.CANCEL:
-        job = get_job(uuid=message['text'])
-        if job:
-            if job.status not in (JobStatusesEn.QUEUE, JobStatusesEn.PROCESS):
-                update_job_status(uuid=message['text'])
+        session = Session()
+        job = get_job(uuid=message['text'], session=session)
+        try:
+            if job:
+                if job.status not in (JobStatusesEn.QUEUE, JobStatusesEn.PROCESS):
+                    update_job_status(uuid=message['text'])
 
-                log.info(f'[{group_id}] Рассылка {message['text']}, была отменена')
+                    log.info(f'[{group_id}] Рассылка {message['text']}, была отменена')
 
-                vk.messages.send(
-                    user_id=user_info['user_id'], 
-                    random_id=0,
-                    message=success_update_status_text
-                )
+                    vk.messages.send(
+                        user_id=user_info['user_id'], 
+                        random_id=0,
+                        message=success_update_status_text
+                    )
 
-                states[group_id] = ''
+                    states[group_id] = ''
+                else:
+                    vk.messages.send(
+                        user_id=user_info['user_id'], 
+                        random_id=0,
+                        message='Задача в процессе обработки, нельзя отменить!'
+                    )
+
+                    states[group_id] = ''
             else:
                 vk.messages.send(
                     user_id=user_info['user_id'], 
                     random_id=0,
-                    message='Задача в процессе обработки, нельзя отменить!'
+                    message=not_success_update_status_text
                 )
-
-                states[group_id] = ''
-        else:
-            vk.messages.send(
-                user_id=user_info['user_id'], 
-                random_id=0,
-                message=not_success_update_status_text
-            )
+        finally:
+            session.commit()
+            session.close()
 
    
 def admin_commands_handl(group_id: int, user_info: dict, message, states: dict, vk: VkApiMethod) -> None:
